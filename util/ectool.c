@@ -10785,9 +10785,8 @@ int main(int argc, char *argv[])
 		case OPT_INTERFACE:
 			if (!strcasecmp(optarg, "dev")) {
 				interfaces = COMM_DEV;
-			} else if (!strcasecmp(optarg, "fwk")) {
-				interfaces = COMM_FWK;
-			} else if (!strcasecmp(optarg, "lpc")) {
+			} else if (!strcasecmp(optarg, "fwk") || !strcasecmp(optarg, "lpc")) {
+				// Compatibility alias (fwk => lpc)
 				interfaces = COMM_LPC;
 			} else if (!strcasecmp(optarg, "i2c")) {
 				interfaces = COMM_I2C;
