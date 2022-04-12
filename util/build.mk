@@ -6,17 +6,17 @@
 # Host tools build
 #
 
-# See Makefile for description.
-host-util-bin-y += ectool  
-#lbplay stm32mon ec_sb_firmware_update lbcc \
-	 
-#ec_parse_panicinfo cbi-util iteflash
-build-util-art-y += util/export_taskinfo.so
-
-build-util-bin-$(CHIP_NPCX) += ecst
-build-util-bin-$(BOARD_NOCTURNE_FP) += ectool_servo
-
-#host-util-bin-y += uartupdatetool
+host-util-bin-y=ectool
+#lbplay stm32mon ec_sb_firmware_update lbcc ec_parse_panicinfo cbi-util
+build-util-bin=ec_uartd
+build-util-art+=util/export_taskinfo.so
+ifeq ($(CHIP),npcx)
+build-util-bin+=ecst
+endif
+ifeq ($(CHIP_FAMILY),it8xxx2)
+build-util-bin+=iteflash
+endif
+#host-util-bin+=uartupdatetool
 uartupdatetool-objs=uut/main.o uut/cmd.o uut/opr.o uut/l_com_port.o \
 	uut/lib_crc.o
 $(out)/util/uartupdatetool: HOST_CFLAGS+=-Iutil/
@@ -28,7 +28,7 @@ include util/private/build.mk
 endif
 
 comm-objs=$(util-lock-objs:%=lock/%) comm-host.o comm-dev.o
-comm-objs+=comm-lpc.o comm-i2c.o misc_util.o comm-fwk.o
+comm-objs+=comm-lpc.o comm-mec_lpc.o comm-i2c.o misc_util.o
 
 iteflash-objs = iteflash.o usb_if.o
 ectool-objs=ectool.o ectool_keyscan.o ec_flash.o ec_panicinfo.o $(comm-objs)
