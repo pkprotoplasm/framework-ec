@@ -479,6 +479,11 @@
 #undef CONFIG_BATTERY
 
 /*
+ * Config to indicate the battery type that cannot be auto detected.
+ */
+#undef CONFIG_BATTERY_TYPE_NO_AUTO_DETECT
+
+/*
  * Compile battery-specific code.
  *
  * Note that some boards have their own unique battery constants / functions.
@@ -4064,10 +4069,11 @@
 
 /*
  * If defined, active-high GPIO which indicates temperature sensor chips are
- * powered.  If not defined, temperature sensors are assumed to be always
+ * powered. The GPIO pin must be defined as GPIO_TEMP_SENSOR_POWER.
+ * If not defined, temperature sensors are assumed to be always
  * powered.
  */
-#undef CONFIG_TEMP_SENSOR_POWER_GPIO
+#undef CONFIG_TEMP_SENSOR_POWER
 
 /* AMD STT (Skin Temperature Tracking) */
 #undef CONFIG_AMD_STT
@@ -4894,6 +4900,7 @@
 
 /* USB Type-C Power Path Controllers (PPC) */
 #undef CONFIG_USBC_PPC_AOZ1380
+#undef CONFIG_USBC_PPC_KTU1125
 #undef CONFIG_USBC_PPC_NX20P3481
 #undef CONFIG_USBC_PPC_NX20P3483
 #undef CONFIG_USBC_PPC_RT1718S
@@ -5920,6 +5927,7 @@
 /*****************************************************************************/
 /* Define CONFIG_USBC_OCP if a component can detect overcurrent */
 #if defined(CONFIG_USBC_PPC_AOZ1380) || \
+	defined(CONFIG_USBC_PPC_KTU1125) || \
 	defined(CONFIG_USBC_PPC_NX20P3481) || \
 	defined(CONFIG_USBC_PPC_NX20P3483) || \
 	defined(CONFIG_USBC_PPC_SN5S330) || \

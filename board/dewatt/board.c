@@ -17,7 +17,7 @@
 #include "driver/retimer/ps8811.h"
 #include "driver/retimer/ps8818.h"
 #include "driver/temp_sensor/sb_tsi.h"
-#include "driver/temp_sensor/tmp112.h"
+#include "driver/temp_sensor/pct2075.h"
 #include "extpower.h"
 #include "gpio.h"
 #include "hooks.h"
@@ -30,7 +30,7 @@
 #include "tablet_mode.h"
 #include "temp_sensor.h"
 #include "temp_sensor/thermistor.h"
-#include "temp_sensor/tmp112.h"
+#include "temp_sensor/pct2075.h"
 #include "thermal.h"
 #include "usb_mux.h"
 
@@ -242,10 +242,10 @@ __override int board_c1_ps8818_mux_set(const struct usb_mux *me,
 			return rv;
 
 		/* Enable HPD on the DB */
-		gpio_set_level(GPIO_USB_C1_HPD, 1);
+		ioex_set_level(IOEX_USB_C1_IN_HPD, 1);
 	} else {
 		/* Disable HPD on the DB */
-		gpio_set_level(GPIO_USB_C1_HPD, 0);
+		ioex_set_level(IOEX_USB_C1_IN_HPD, 0);
 	}
 
 	return rv;
@@ -303,7 +303,7 @@ DECLARE_HOOK(HOOK_INIT, board_init, HOOK_PRIO_DEFAULT);
 static void board_chipset_startup(void)
 {
 	if (get_board_version() > 1)
-		tmp112_init();
+		pct2075_init();
 }
 DECLARE_HOOK(HOOK_CHIPSET_STARTUP, board_chipset_startup,
 	     HOOK_PRIO_DEFAULT);
@@ -313,7 +313,7 @@ int board_get_soc_temp_k(int idx, int *temp_k)
 	if (chipset_in_state(CHIPSET_STATE_HARD_OFF))
 		return EC_ERROR_NOT_POWERED;
 
-	return tmp112_get_val_k(idx, temp_k);
+	return pct2075_get_val_k(idx, temp_k);
 }
 
 int board_get_soc_temp_mk(int *temp_mk)
@@ -321,7 +321,7 @@ int board_get_soc_temp_mk(int *temp_mk)
 	if (chipset_in_state(CHIPSET_STATE_HARD_OFF))
 		return EC_ERROR_NOT_POWERED;
 
-	return tmp112_get_val_mk(TMP112_SOC, temp_mk);
+	return pct2075_get_val_mk(PCT2075_SOC, temp_mk);
 }
 
 int board_get_ambient_temp_mk(int *temp_mk)
@@ -329,7 +329,7 @@ int board_get_ambient_temp_mk(int *temp_mk)
 	if (chipset_in_state(CHIPSET_STATE_HARD_OFF))
 		return EC_ERROR_NOT_POWERED;
 
-	return tmp112_get_val_mk(TMP112_AMB, temp_mk);
+	return pct2075_get_val_mk(PCT2075_AMB, temp_mk);
 }
 
 /* ADC Channels */
@@ -375,18 +375,18 @@ BUILD_ASSERT(ARRAY_SIZE(adc_channels) == ADC_CH_COUNT);
 /* Temp Sensors */
 static int board_get_memory_temp(int, int *);
 
-const struct tmp112_sensor_t tmp112_sensors[] = {
-	{ I2C_PORT_SENSOR, TMP112_I2C_ADDR_FLAGS0 },
-	{ I2C_PORT_SENSOR, TMP112_I2C_ADDR_FLAGS1 },
+const struct pct2075_sensor_t pct2075_sensors[] = {
+	{ I2C_PORT_SENSOR, PCT2075_I2C_ADDR_FLAGS0 },
+	{ I2C_PORT_SENSOR, PCT2075_I2C_ADDR_FLAGS7 },
 };
-BUILD_ASSERT(ARRAY_SIZE(tmp112_sensors) == TMP112_COUNT);
+BUILD_ASSERT(ARRAY_SIZE(pct2075_sensors) == PCT2075_COUNT);
 
 const struct temp_sensor_t temp_sensors[] = {
 	[TEMP_SENSOR_SOC] = {
 		.name = "SOC",
 		.type = TEMP_SENSOR_TYPE_BOARD,
 		.read = board_get_soc_temp_k,
-		.idx = TMP112_SOC,
+		.idx = PCT2075_SOC,
 	},
 	[TEMP_SENSOR_CHARGER] = {
 		.name = "Charger",
@@ -409,68 +409,11 @@ const struct temp_sensor_t temp_sensors[] = {
 	[TEMP_SENSOR_AMBIENT] = {
 		.name = "Ambient",
 		.type = TEMP_SENSOR_TYPE_BOARD,
-		.read = tmp112_get_val_k,
-		.idx = TMP112_AMB,
+		.read = pct2075_get_val_k,
+		.idx = PCT2075_AMB,
 	},
 };
 BUILD_ASSERT(ARRAY_SIZE(temp_sensors) == TEMP_SENSOR_COUNT);
-
-struct ec_thermal_config thermal_params[TEMP_SENSOR_COUNT] = {
-	[TEMP_SENSOR_SOC] = {
-		.temp_host = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(100),
-			[EC_TEMP_THRESH_HALT] = C_TO_K(105),
-		},
-		.temp_host_release = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(80),
-		},
-		/* TODO: Setting fan off to 0 so it's allways on */
-		.temp_fan_off = C_TO_K(0),
-		.temp_fan_max = C_TO_K(70),
-	},
-	[TEMP_SENSOR_CHARGER] = {
-		.temp_host = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(100),
-			[EC_TEMP_THRESH_HALT] = C_TO_K(105),
-		},
-		.temp_host_release = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(80),
-		},
-		.temp_fan_off = 0,
-		.temp_fan_max = 0,
-	},
-	[TEMP_SENSOR_MEMORY] = {
-		.temp_host = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(100),
-			[EC_TEMP_THRESH_HALT] = C_TO_K(105),
-		},
-		.temp_host_release = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(80),
-		},
-		.temp_fan_off = 0,
-		.temp_fan_max = 0,
-	},
-	[TEMP_SENSOR_CPU] = {
-		.temp_host = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(100),
-			[EC_TEMP_THRESH_HALT] = C_TO_K(105),
-		},
-		.temp_host_release = {
-			[EC_TEMP_THRESH_HIGH] = C_TO_K(80),
-		},
-		/*
-		 * CPU temp sensor fan thresholds are high because they are a
-		 * backup for the SOC temp sensor fan thresholds.
-		 */
-		.temp_fan_off = C_TO_K(60),
-		.temp_fan_max = C_TO_K(90),
-	},
-	/*
-	 * Note: Leave ambient entries at 0, both as it does not represent a
-	 * hotspot and as not all boards have this sensor
-	 */
-};
-BUILD_ASSERT(ARRAY_SIZE(thermal_params) == TEMP_SENSOR_COUNT);
 
 static int board_get_memory_temp(int idx, int *temp_k)
 {

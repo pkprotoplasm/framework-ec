@@ -6,30 +6,44 @@
 / {
 	named-i2c-ports {
 		compatible = "named-i2c-ports";
-		eeprom {
-			i2c-port = <&i2c0_0>;
-			enum-name = "I2C_PORT_EEPROM";
-		};
+
 		i2c_sensor: sensor {
-			i2c-port = <&i2c1_0>;
+			i2c-port = <&i2c0_0>;
 			enum-name = "I2C_PORT_SENSOR";
 		};
-		tcpc0 {
-			i2c-port = <&i2c3_0>;
-			enum-name = "I2C_PORT_USB_C0_TCPC";
+		i2c_usb_c0: usb-c0 {
+			i2c-port = <&i2c1_0>;
+			enum-name = "I2C_PORT_USB_C0";
+		};
+		i2c_usb_c1: usb-c1 {
+			i2c-port = <&i2c2_0>;
+			enum-name = "I2C_PORT_USB_C1";
 		};
 		tcpc1 {
-			i2c-port = <&i2c5_1>;
+			i2c-port = <&i2c2_0>;
 			enum-name = "I2C_PORT_USB_C1_TCPC";
 		};
+		ppc1 {
+			i2c-port = <&i2c2_0>;
+			enum-name = "I2C_PORT_USB_C1_PPC";
+		};
+		eeprom {
+			i2c-port = <&i2c3_0>;
+			enum-name = "I2C_PORT_EEPROM";
+		};
+		charger {
+			i2c-port = <&i2c3_0>;
+			enum-name = "I2C_PORT_POWER";
+		};
 		battery {
-			i2c-port = <&i2c7_0>;
+			i2c-port = <&i2c5_0>;
 			enum-name = "I2C_PORT_BATTERY";
 		};
 	};
 };
 
 &i2c0_0 {
+	label = "I2C_SENSOR";
 	status = "okay";
 	clock-frequency = <I2C_BITRATE_FAST>;
 };
@@ -39,37 +53,41 @@
 };
 
 &i2c1_0 {
+	label = "I2C_USB_C0";
 	status = "okay";
-	clock-frequency = <I2C_BITRATE_FAST>;
+	clock-frequency = <I2C_BITRATE_FAST_PLUS>;
 };
 
 &i2c_ctrl1 {
 	status = "okay";
 };
 
-&i2c3_0 {
+&i2c2_0 {
+	label = "I2C_USB_C1";
 	status = "okay";
 	clock-frequency = <I2C_BITRATE_FAST_PLUS>;
+};
+
+&i2c_ctrl2 {
+	status = "okay";
+};
+
+i2c_pwr_cbi: &i2c3_0 {
+	label = "I2C_PWR_CBI";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
 };
 
 &i2c_ctrl3 {
 	status = "okay";
 };
 
-&i2c5_1 {
-	status = "okay";
-	clock-frequency = <I2C_BITRATE_FAST_PLUS>;
-};
-
-&i2c_ctrl5 {
-	status = "okay";
-};
-
-&i2c7_0 {
+&i2c5_0 {
+	label = "I2C_BATTERY";
 	status = "okay";
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 };
 
-&i2c_ctrl7 {
+&i2c_ctrl5 {
 	status = "okay";
 };

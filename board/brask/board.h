@@ -75,6 +75,7 @@
 #define GPIO_PCH_RTCRST			GPIO_EC_PCH_RTCRST
 #define GPIO_PCH_SLP_S0_L		GPIO_SYS_SLP_S0IX_L
 #define GPIO_PCH_SLP_S3_L		GPIO_SLP_S3_L
+#define GPIO_TEMP_SENSOR_POWER		GPIO_SEQ_EC_DSW_PWROK
 
 /*
  * GPIO_EC_PCH_INT_ODL is used for MKBP events as well as a PCH wakeup
@@ -129,7 +130,7 @@
 /* Thermal features */
 #define CONFIG_THERMISTOR
 #define CONFIG_TEMP_SENSOR
-#define CONFIG_TEMP_SENSOR_POWER_GPIO	GPIO_SEQ_EC_DSW_PWROK
+#define CONFIG_TEMP_SENSOR_POWER
 #define CONFIG_STEINHART_HART_3V3_30K9_47K_4050B
 
 /* ADC */
@@ -139,7 +140,7 @@
  * TODO(b/197478860): Enable the fan control. We need
  * to check the sensor value and adjust the fan speed.
  */
-/* #define CONFIG_FANS			FAN_CH_COUNT */
+ #define CONFIG_FANS			FAN_CH_COUNT
 
 /* Include math_util for bitmask_uint64 used in pd_timers */
 #define CONFIG_MATH_UTIL

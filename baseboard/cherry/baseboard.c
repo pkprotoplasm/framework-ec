@@ -148,7 +148,7 @@ struct ppc_config_t ppc_chips[CONFIG_USB_PD_PORT_MAX_COUNT] = {
 	},
 	{
 		.i2c_port = I2C_PORT_PPC1,
-		.i2c_addr_flags = RT1718S_I2C_ADDR_FLAGS,
+		.i2c_addr_flags = RT1718S_I2C_ADDR1_FLAGS,
 		.drv = &rt1718s_ppc_drv,
 	},
 };
@@ -282,7 +282,7 @@ const struct usb_mux usbc1_virtual_mux = {
 	.hpd_update = &virtual_hpd_update,
 };
 
-static int board_ps8802_mux_set(const struct usb_mux *me,
+static int board_ps8762_mux_set(const struct usb_mux *me,
 				mux_state_t mux_state)
 {
 	/* Make sure the PS8802 is awake */
@@ -311,6 +311,15 @@ static int board_ps8802_mux_set(const struct usb_mux *me,
 	return EC_SUCCESS;
 }
 
+static int board_ps8762_mux_init(const struct usb_mux *me)
+{
+	return ps8802_i2c_field_update8(
+			me, PS8802_REG_PAGE1,
+			PS8802_REG_DCIRX,
+			PS8802_AUTO_DCI_MODE_DISABLE | PS8802_FORCE_DCI_MODE,
+			PS8802_AUTO_DCI_MODE_DISABLE);
+}
+
 static int board_anx3443_mux_set(const struct usb_mux *me,
 				 mux_state_t mux_state)
 {
@@ -326,7 +335,8 @@ const struct usb_mux usb_muxes[CONFIG_USB_PD_PORT_MAX_COUNT] = {
 		.i2c_addr_flags = PS8802_I2C_ADDR_FLAGS,
 		.driver = &ps8802_usb_mux_driver,
 		.next_mux = &usbc0_virtual_mux,
-		.board_set = &board_ps8802_mux_set,
+		.board_init = &board_ps8762_mux_init,
+		.board_set = &board_ps8762_mux_set,
 	},
 	{
 		.usb_port = 1,
@@ -406,7 +416,7 @@ const struct tcpc_config_t tcpc_config[CONFIG_USB_PD_PORT_MAX_COUNT] = {
 		.bus_type = EC_BUS_TYPE_I2C,
 		.i2c_info = {
 			.port = I2C_PORT_USB1,
-			.addr_flags = RT1718S_I2C_ADDR_FLAGS,
+			.addr_flags = RT1718S_I2C_ADDR1_FLAGS,
 		},
 		.drv = &rt1718s_tcpm_drv,
 	},
