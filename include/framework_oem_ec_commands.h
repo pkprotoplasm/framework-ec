@@ -7,9 +7,10 @@
 /* Charge limit control */
 #define FW_EC_CMD_CHARGE_LIMIT   0x3E03
 
-#define FW_EC_CHARGE_LIMIT_CLEAR BIT(0)
-#define FW_EC_CHARGE_LIMIT_SET   BIT(1)
-#define FW_EC_CHARGE_LIMIT_QUERY BIT(3)
+#define FW_EC_CHARGE_LIMIT_CLEAR    BIT(0)
+#define FW_EC_CHARGE_LIMIT_SET      BIT(1)
+#define FW_EC_CHARGE_LIMIT_QUERY    BIT(3)
+#define FW_EC_CHARGE_LIMIT_OVERRIDE BIT(7)
 struct fw_ec_params_charge_limit {
 	uint8_t flags;
 	uint16_t limit; // 0-100

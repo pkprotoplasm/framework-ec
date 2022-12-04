@@ -10507,6 +10507,9 @@ int cmd_fw_charge_limit(int argc, char *argv[])
 			fprintf(stderr, "invalid argument \"%s\"\n", argv[1]);
 			return 1;
 		}
+
+		if (argc > 2 && !strcmp(argv[2], "once"))
+			p.flags |= FW_EC_CHARGE_LIMIT_OVERRIDE;
 	}
 
 	rv = ec_command(FW_EC_CMD_CHARGE_LIMIT, 0, &p, sizeof(p), &r, sizeof(r));
